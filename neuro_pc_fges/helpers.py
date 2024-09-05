@@ -3,6 +3,10 @@ from causallearn.search.ConstraintBased.PC import pc
 import sys
 sys.path.append("../astro_pc_fges_test")
 from estimate_parameters import *
+sys.path.append("../astro_pc_fges_test/fges-py")
+from SEMScore import *
+from fges import *
+from SemEstimator import SemEstimator
 
 # subsampling
 def subsample_data(data, n_samples):
