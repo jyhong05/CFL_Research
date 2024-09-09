@@ -35,7 +35,7 @@ def get_fmri_data():
     return all_data, combined_data
 
 # PC get avg adjacency matrix
-def get_avg_adj_matrix(data, n_samples, num_samplings, alpha=0.05):
+def pc_get_avg_adj_matrix(data, n_samples, num_samplings, alpha=0.05):
     adj_mats = []
     for _ in range(num_samplings):
         subsamples = subsample_data(data, n_samples)
@@ -46,7 +46,7 @@ def get_avg_adj_matrix(data, n_samples, num_samplings, alpha=0.05):
     return np.mean(adj_mats, axis=0)
 
 # FGES infer edges
-def infer_edges(data, s=8):
+def fges_infer_edges(data, s=8):
     '''
     Arguments:
         data : an n_samples x n_nodes array
@@ -75,3 +75,43 @@ def fges_edges_to_mat(edges, n_nodes):
         adj_mat[i, j] = 1
         adj_mat[j, i] = 1
     return adj_mat
+
+# FGES get avg adjacency matrix, also returns fges results for later use
+def fges_avg_adj_mat_and_results(data, n_samples, num_samplings, s=8):
+    adj_mats = []
+    fges_results = []
+    for _ in range(num_samplings):
+        subsamples = subsample_data(data, n_samples)
+        for subsample in subsamples:
+            edges, fges_result = fges_infer_edges(subsample, s=s)
+            adj_mats.append(fges_edges_to_mat(edges, data.shape[1]))
+            fges_results.append(fges_result)
+    
+    return np.mean(adj_mats, axis=0), fges_results
+
+# estimated correlation matrix
+def fges_estimate_corr(data, fges_result):
+    '''
+    Arguments:
+        data : an n_samples x n_nodes numpy array
+        fges_result : a dict of results returned by fges.search()
+    Returns:
+        est_corr : an n_nodes x n_nodes numpy array estimated correlation matrix
+    '''
+    sem_est = SemEstimator(data, sparsity=4)
+
+    # provide to the estimator the DAG found above
+    sem_est.pattern = fges_result['graph']
+
+    # estimate the weights and residuals
+    sem_est.estimate()
+
+    # get covariance matrix from SemEstimator
+    est_cov = sem_est.graph_cov
+
+    # compute correlation matrix from covariance matrix
+    stdistdj = np.sqrt(np.diag(est_cov))
+    est_corr = est_cov / np.outer(stdistdj, stdistdj)
+
+    np.fill_diagonal(est_corr, 0)
+    return est_corr
