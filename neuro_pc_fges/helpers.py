@@ -115,3 +115,35 @@ def fges_estimate_corr(data, fges_result):
 
     np.fill_diagonal(est_corr, 0)
     return est_corr
+
+# mean absolute deviation, way to measure differences between adjacency matrices
+def mean_abs_deviations(adj_mats):
+    avg_mat = np.mean(adj_mats, axis=0)
+    mad_mats = [np.abs(mat - avg_mat) for mat in adj_mats]
+    total_mad = np.sum(np.sum(mad_mats, axis=0))
+
+    return mad_mats, total_mad
+
+def estimate_corr(data, fges_result):
+    '''
+    Arguments:
+        data : an n_samples x n_nodes numpy array
+        fges_result : a dict of results returned by fges.search()
+    Returns:
+        est_corr : an n_nodes x n_nodes numpy array estimated correlation matrix
+    '''
+    sem_est = SemEstimator(data, sparsity=4)
+
+    # provide to the estimator the DAG found above
+    sem_est.pattern = fges_result['graph']
+
+    # estimate the weights and residuals
+    sem_est.estimate()
+
+    # get covariance matrix from SemEstimator
+    est_cov = sem_est.graph_cov
+
+    # compute correlation matrix from covariance matrix
+    stdistdj = np.sqrt(np.diag(est_cov))
+    est_corr = est_cov / np.outer(stdistdj, stdistdj)
+    return est_corr
