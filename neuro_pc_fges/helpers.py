@@ -147,3 +147,11 @@ def estimate_corr(data, fges_result):
     stdistdj = np.sqrt(np.diag(est_cov))
     est_corr = est_cov / np.outer(stdistdj, stdistdj)
     return est_corr
+
+def edge_names_from_adj_mat(adj_mat):
+    edge_names = []
+    for i in range(adj_mat.shape[0]):
+        for j in range(i, adj_mat.shape[1]):
+            if adj_mat[i, j] == 1:
+                edge_names.append((i, j))
+    return edge_names
