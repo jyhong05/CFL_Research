@@ -1,0 +1,4 @@
+reset unpushed commit: git reset --soft HEAD~1
+hard reset to commit: git reset --hard <commit>
+check lfs files: git lfs ls-files --all
+remove from git tracking but keep local: git rm -r --cached misc/
