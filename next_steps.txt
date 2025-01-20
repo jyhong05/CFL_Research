@@ -1,0 +1,8 @@
+cluster # vs accuracy
+Varying for different sample sizes as well (keep uniform distribution)
+
+nonlinear function for temp generation, keep same stdev as linear
+
+how to structure neural net based on only cause and effect, don't know ground truth?
+
+change CFL library code to run without venv
