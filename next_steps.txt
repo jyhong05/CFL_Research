@@ -1,8 +1,15 @@
-cluster # vs accuracy
-Varying for different sample sizes as well (keep uniform distribution)
+1. cluster # vs accuracy, varying for different sample sizes as well (keep uniform distribution)
+- The coarser the data, the more effect number of clusters has (stronger negative relationship)
 
-nonlinear function for temp generation, keep same stdev as linear
+2. nonlinear function for temp generation, keep same stdev as linear
+- Exponential distribution makes clustering more coarser, probably because higher power exponential functions turn it more of a binary classifier than a continuous relationship
+    - high alt vs not as high
+    - try playing around with nn architercture? I don't know if that will help though, reconstructed elevation reflects nonlinear temp plot pretty well
+- try other nonlinear funcs?
 
-how to structure neural net based on only cause and effect, don't know ground truth?
+3. how to structure neural net based on only cause and effect, don't know ground truth?
+- need to play around with different temp generation functions, giving different Y, X stays same
 
-change CFL library code to run without venv
+4. change CFL library code to run without venv
+- import old library versions within CFL library or update all uses of functions?
+    - first option probably a lot easier, sifting through entire repo will not be fun
