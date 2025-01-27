@@ -8,8 +8,23 @@
 - try other nonlinear funcs?
 
 3. how to structure neural net based on only cause and effect, don't know ground truth?
+- QUESTION: where exactly in the CDE process does the NN come in? Last explanation of CFL didn't include a NN
 - need to play around with different temp generation functions, giving different Y, X stays same
 
-4. change CFL library code to run without venv
+4. change CFL library code to run without venv < still need to do this
 - import old library versions within CFL library or update all uses of functions?
     - first option probably a lot easier, sifting through entire repo will not be fun
+
+5. Why does coarser data require finer clustering? Check lower clusters numbers (in between 10 and 100)
+- Check clusters averages distribution
+
+6. Show distribution of elevations within all clusters (averages)
+
+7. check for errors in n clusters vs err code
+- check for averaging over number of sample numbers
+
+8. Test data vs training data
+
+9. Pipeline to: given grid size and ground truth function (linear, exp, etc.) and cluster number, get mean abs error
+
+10. think about good plots to show reconstruction
