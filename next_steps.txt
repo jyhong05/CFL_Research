@@ -15,15 +15,19 @@
 - import old library versions within CFL library or update all uses of functions?
     - first option probably a lot easier, sifting through entire repo will not be fun
 
+MEETING 2:
+
 5. Why does coarser data require finer clustering? Check lower clusters numbers (in between 10 and 100)
 - Check clusters averages distribution
+- suspect something to do with the error terms OR error only goes down at some fraction of total number of points?
 
 6. Show distribution of elevations within all clusters (averages)
 
 7. check for errors in n clusters vs err code
-- check for averaging over number of sample numbers
+- check for averaging over number of sample numbers - NOT IT
 
 8. Test data vs training data
+- Eberhardt will find
 
 9. Pipeline to: given grid size and ground truth function (linear, exp, etc.) and cluster number, get mean abs error
 
