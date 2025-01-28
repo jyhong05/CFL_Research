@@ -26,14 +26,15 @@ def get_alt_temp_grids(data):
 
 def get_group_avgs(data, xlbls):
     elevations = list(data['elevation'])
-    xlbl_avgs = {xlbl:[] for xlbl in xlbls}
+    xlbl_dict = {xlbl:[] for xlbl in xlbls}
+    xlbl_avgs = {xlbl:0 for xlbl in xlbls}
 
     for i, xlbl in enumerate(xlbls):
-        xlbl_avgs[xlbl].append(elevations[i])
-    for key, arr in zip(xlbl_avgs.keys(), xlbl_avgs.values()):
+        xlbl_dict[xlbl].append(elevations[i])
+    for key, arr in zip(xlbl_dict.keys(), xlbl_dict.values()):
         xlbl_avgs[key] = sum(arr)/len(arr)
 
-    return xlbl_avgs
+    return xlbl_avgs, xlbl_dict
 
 def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Terrain'):
     df_copy = data[['lat', 'long']].copy()

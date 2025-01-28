@@ -19,9 +19,15 @@ MEETING 2:
 
 5. Why does coarser data require finer clustering? Check lower clusters numbers (in between 10 and 100)
 - Check clusters averages distribution
+    - Show distribution of elevations within all clusters (averages)
 - suspect something to do with the error terms OR error only goes down at some fraction of total number of points?
-
-6. Show distribution of elevations within all clusters (averages)
+#########################################################
+- Could the mistake be taking the average of each group (further interpolation) and using the reconstruction to calculate error?
+    - error function (absolute error from the mean within a group) rewards groups that are as small as possible
+    - smaller cluster groups -> less variance and deviation -> error keeps going down until there is only one datapoint per cluster
+    - explains why error starts decreasing at a fraction of total data points rather than a set number
+    - TLDR: mistake is with error function, so what other way to measure how good the clustering is?
+#########################################################
 
 7. check for errors in n clusters vs err code
 - check for averaging over number of sample numbers - NOT IT
