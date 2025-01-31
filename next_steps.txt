@@ -28,13 +28,17 @@ MEETING 2:
     - explains why error starts decreasing at a fraction of total data points rather than a set number
     - TLDR: mistake is with error function, so what other way to measure how good the clustering is?
 #########################################################
+- Check if range within the group is < some number of standard deviations?
+- Check distributions against true distribution
+- R2 and adjusted R2 metrics
 
-7. check for errors in n clusters vs err code
-- check for averaging over number of sample numbers - NOT IT
-
-8. Test data vs training data
+7. Test data vs training data
 - Eberhardt will find
 
-9. Pipeline to: given grid size and ground truth function (linear, exp, etc.) and cluster number, get mean abs error
+8. Pipeline to: given grid size and ground truth function (linear, exp, etc.) and cluster number, get mean abs error
 
-10. think about good plots to show reconstruction
+9. think about good plots to show reconstruction
+
+
+IMPORTANT: don't use ground truth elevation, use model's prediction for temperature, compare to ground truth templeratre (without error), reconstruct temperature map instead
+distribution plots with predicted temperature, x axis changes (try to match the ground truth x axis), should be sort of piecewise with some error

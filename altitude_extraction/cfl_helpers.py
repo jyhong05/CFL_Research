@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 
 def get_alt_temp_grids(data):
     asc_longs = np.sort(data['long'].unique())
@@ -26,8 +27,8 @@ def get_alt_temp_grids(data):
 
 def get_group_avgs(data, xlbls):
     elevations = list(data['elevation'])
-    xlbl_dict = {xlbl:[] for xlbl in xlbls}
-    xlbl_avgs = {xlbl:0 for xlbl in xlbls}
+    xlbl_dict = {xlbl:[] for xlbl in set(xlbls)}
+    xlbl_avgs = {xlbl:0 for xlbl in set(xlbls)}
 
     for i, xlbl in enumerate(xlbls):
         xlbl_dict[xlbl].append(elevations[i])
@@ -40,7 +41,7 @@ def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Terrain'):
     df_copy = data[['lat', 'long']].copy()
 
     df_copy['xlbl'] = xlbls
-    group_avgs = get_group_avgs(data, xlbls)
+    group_avgs, _ = get_group_avgs(data, xlbls)
 
     asc_longs = np.sort(df_copy['long'].unique())
     desc_lats = np.sort(df_copy['lat'].unique())[::-1]
@@ -121,3 +122,16 @@ def plot_err(true_grid, pred_grid, err_type='abs'):
         plot_squared_err(true_grid, pred_grid)
     else:
         raise ValueError('Invalid error type')
+    
+def r2(true_grid, pred_grid):
+    true_grid, pred_grid = np.array(true_grid), np.array(pred_grid)
+    mask = ~np.isnan(true_grid) & ~np.isnan(pred_grid)
+    return r2_score(np.ravel(true_grid[mask]), np.ravel(pred_grid[mask]))
+
+def adjusted_r2(true_grid, pred_grid, n_clusters):
+    true_grid, pred_grid = np.array(true_grid), np.array(pred_grid)
+    mask = ~np.isnan(true_grid) & ~np.isnan(pred_grid)
+    n_points = np.count_nonzero(mask)
+    r2 = r2_score(np.ravel(true_grid[mask]), np.ravel(pred_grid[mask]))
+
+    return 1 - (1 - r2) * (n_points - 1) / (n_points - n_clusters - 1)
