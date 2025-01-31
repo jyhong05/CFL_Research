@@ -26,18 +26,18 @@ def get_alt_temp_grids(data):
     return alt_grid, temp_grid
 
 def get_group_avgs(data, xlbls):
-    elevations = list(data['elevation'])
+    temps = list(data['generated_temp'])
     xlbl_dict = {xlbl:[] for xlbl in set(xlbls)}
     xlbl_avgs = {xlbl:0 for xlbl in set(xlbls)}
 
     for i, xlbl in enumerate(xlbls):
-        xlbl_dict[xlbl].append(elevations[i])
+        xlbl_dict[xlbl].append(temps[i])
     for key, arr in zip(xlbl_dict.keys(), xlbl_dict.values()):
         xlbl_avgs[key] = sum(arr)/len(arr)
 
     return xlbl_avgs, xlbl_dict
 
-def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Terrain'):
+def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Temps'):
     df_copy = data[['lat', 'long']].copy()
 
     df_copy['xlbl'] = xlbls
@@ -63,15 +63,28 @@ def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Terrain'):
         
         grid.append(row)
     
-    # print(points_count)
-    
     if plot:
-        plt.imshow(grid, cmap='terrain', interpolation='nearest', vmin=0, vmax=data['elevation'].max())
+        plt.imshow(grid, cmap='hot_r', interpolation='nearest', vmin=data['generated_temp'].min(), vmax=data['generated_temp'].max())
         plt.colorbar()
         plt.title(title)
 
     return grid
 
+def by_cluster_abs_err(data, xlbls, truth):
+    pred_group_avgs, _ = get_group_avgs(data, xlbls)
+    _, true_groups = get_group_avgs(truth, xlbls)
+    abs_err = 0
+
+    for group in pred_group_avgs.keys():
+        true_temps = np.array(true_groups[group])
+        pred_temp = pred_group_avgs[group]
+        abs_err += np.abs(np.mean(true_temps - pred_temp))
+    
+    return abs_err
+
+
+# ALL DEPRECATED, WRONG IMPLEMENTATION (PREDICTED ELEVATION NOT TEMP)
+'''
 def assert_grids(true_grid, pred_grid):
     assert len(true_grid) == len(pred_grid)
     assert len(true_grid[0]) == len(pred_grid[0])
@@ -135,3 +148,4 @@ def adjusted_r2(true_grid, pred_grid, n_clusters):
     r2 = r2_score(np.ravel(true_grid[mask]), np.ravel(pred_grid[mask]))
 
     return 1 - (1 - r2) * (n_points - 1) / (n_points - n_clusters - 1)
+'''
