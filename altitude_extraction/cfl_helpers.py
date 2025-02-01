@@ -78,9 +78,9 @@ def by_cluster_abs_err(data, xlbls, truth):
     for group in pred_group_avgs.keys():
         true_temps = np.array(true_groups[group])
         pred_temp = pred_group_avgs[group]
-        abs_err += np.abs(np.mean(true_temps - pred_temp))
+        abs_err += np.mean(np.abs(true_temps - pred_temp))
     
-    return abs_err
+    return abs_err / len(pred_group_avgs.keys())
 
 
 # ALL DEPRECATED, WRONG IMPLEMENTATION (PREDICTED ELEVATION NOT TEMP)
