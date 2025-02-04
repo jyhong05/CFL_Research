@@ -82,6 +82,40 @@ def by_cluster_abs_err(data, xlbls, truth):
     
     return abs_err / len(pred_group_avgs.keys())
 
+def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, yminmax=None):
+    resolution = "unknown resolution" if not resolution else resolution
+    n_clusters = "unknown" if not n_clusters else n_clusters
+
+    len_data = len(train_data)
+
+    avgs, lbl_dict = get_group_avgs(train_data, xlbls)
+    avgs_list = [(key, avgs[key]) for key in avgs.keys()]
+    avgs_list = sorted(avgs_list, key=lambda x: x[1], reverse=True)
+    x_axis = np.linspace(0, len_data - 1, len_data)
+
+    temp_preds = []
+    for clus, avg in avgs_list:
+        for _ in range(len(lbl_dict[clus])):
+            temp_preds.append(avg)
+    temp_preds = np.array(temp_preds).flatten()
+
+    _ = plt.figure(figsize=(12, 6))
+    fig, ax1 = plt.subplots(figsize=(12, 6))
+
+    print(f'MIN TEMP FOR THIS DATASET: {train_data["generated_temp"].min()}')
+
+    line_color = 'red'
+    ax1.set_xlabel('Index')
+    ax1.set_ylabel('Average Elevation', color=line_color)
+    ax1.plot(x_axis, temp_preds, color=line_color, linewidth=2)
+    ax1.tick_params(axis='y', labelcolor=line_color)
+    if yminmax:
+        ax1.set_ylim(*yminmax)
+    ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.title(f'Average Temp and Count of Points by Cluster - {resolution} + {n_clusters} clusters', fontsize=14)
+    plt.show()
 
 # ALL DEPRECATED, WRONG IMPLEMENTATION (PREDICTED ELEVATION NOT TEMP)
 '''
