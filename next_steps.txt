@@ -40,5 +40,9 @@ MEETING 2:
 9. think about good plots to show reconstruction
 
 
+Gradient for each point, in the direction of max increase
+generate another map, coloring angles
+make graphs look nicer
+
 IMPORTANT: don't use ground truth elevation, use model's prediction for temperature, compare to ground truth templeratre (without error), reconstruct temperature map instead
 distribution plots with predicted temperature, x axis changes (try to match the ground truth x axis), should be sort of piecewise with some error
