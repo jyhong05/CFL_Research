@@ -105,8 +105,8 @@ def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, 
     print(f'MIN TEMP FOR THIS DATASET: {train_data["generated_temp"].min()}')
 
     line_color = 'red'
-    ax1.set_xlabel('Index')
-    ax1.set_ylabel('Average Elevation', color=line_color)
+    ax1.set_xlabel('Index of Points Sorted by Cluster')
+    ax1.set_ylabel('Average Temperature', color=line_color)
     ax1.plot(x_axis, temp_preds, color=line_color, linewidth=2)
     ax1.tick_params(axis='y', labelcolor=line_color)
     if yminmax:
@@ -116,6 +116,84 @@ def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     plt.title(f'Average Temp and Count of Points by Cluster - {resolution} + {n_clusters} clusters', fontsize=14)
     plt.show()
+
+def gen_elevation_grads(data, d, nan_val=-100, white_back=False):
+    grid = np.array(data)
+
+    rows, cols = grid.shape
+    X, Y = np.meshgrid(np.arange(cols), np.arange(rows))
+    U, V = np.zeros_like(grid, dtype=float), np.zeros_like(grid, dtype=float)
+
+    # Compute gradients toward the highest elevation within `d` range
+    for i in range(rows):
+        for j in range(cols):
+            if np.isnan(grid[i, j]):
+                U[i, j] = np.nan
+                V[i, j] = np.nan
+                continue
+
+            max_elevation = grid[i, j]
+            best_dx, best_dy = 0, 0
+
+            # Search within depth `d`
+            for dx in range(-d, d + 1):
+                for dy in range(-d, d + 1):
+                    ni, nj = i + dx, j + dy
+                    if 0 <= ni < rows and 0 <= nj < cols and (dx != 0 or dy != 0):
+                        if grid[ni, nj] > max_elevation:
+                            max_elevation = grid[ni, nj]
+                            best_dx, best_dy = dx, dy
+
+            U[i, j] = best_dy
+            V[i, j] = best_dx
+
+    mag = np.sqrt(U**2 + V**2)
+    norm_U, norm_V = U / (mag + 1e-10), V / (mag + 1e-10)  # Avoid division by zero
+
+    # Plot the quiver plot
+    fig, ax = plt.subplots(figsize=(5, 6), dpi=150)
+    ax.set_title(f'Gradient Toward Highest Elevation (Search Depth={d})', fontsize=10)
+    ax.quiver(X, Y, norm_U, -norm_V, color='black', pivot='mid', scale=40)  # Flip V for correct image alignment
+
+    grid = np.ma.masked_invalid(grid)
+    if not white_back:
+        cmap = plt.get_cmap('terrain')
+        cmap.set_bad('grey')
+        cbar = fig.colorbar(ax.imshow(grid, cmap=cmap, origin='upper'), ax=ax)
+        cbar.ax.tick_params(labelsize=10)
+        cbar.set_label('Elevation (m)', fontsize=13)
+    else:
+        cmap = plt.get_cmap('gray_r')
+        cmap.set_bad('grey')
+        ax.imshow(np.zeros_like(grid), cmap=cmap, origin='upper')
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    return U, V
+
+def grad_angles(U, V, d):
+    angles_raw = np.arctan2(-V, U)
+    angles_raw[angles_raw < 0] += 2 * np.pi
+    angles = angles_raw * 180 / np.pi  # Convert to degrees
+    angles = np.ma.masked_invalid(angles)
+
+    fig, ax = plt.subplots(figsize=(5, 6), dpi=150)
+    ax.set_title(f'Angle Representation of Gradients (Search Depth={d})', fontsize=10)
+    cmap = plt.get_cmap('twilight_shifted')
+    cmap.set_bad('grey')
+
+    im = ax.imshow(angles, cmap=cmap, origin='upper')
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.ax.tick_params(labelsize=10)
+    cbar.set_label('Gradient Direction (Degrees)', fontsize=13)
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    return angles
+
+
 
 # ALL DEPRECATED, WRONG IMPLEMENTATION (PREDICTED ELEVATION NOT TEMP)
 '''
