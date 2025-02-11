@@ -46,3 +46,7 @@ make graphs look nicer
 
 IMPORTANT: don't use ground truth elevation, use model's prediction for temperature, compare to ground truth templeratre (without error), reconstruct temperature map instead
 distribution plots with predicted temperature, x axis changes (try to match the ground truth x axis), should be sort of piecewise with some error
+
+TODO 2/10/2025:
+1. make graphs nicer (distributions specifically)
+2. fix up cfl github
