@@ -50,3 +50,8 @@ distribution plots with predicted temperature, x axis changes (try to match the 
 TODO 2/10/2025:
 1. make graphs nicer (distributions specifically)
 2. fix up cfl github
+
+
+TODO 2/13/2025
+squared error for MAE graph instead, fix legend order, cut off at 150 x axis, change y axis bc squared error, get rid of title
+use matplotlib contour to generate estimations, 5 graphs in a row each with their own titles
