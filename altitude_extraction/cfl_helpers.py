@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from sklearn.metrics import r2_score
 
 def get_alt_temp_grids(data):
@@ -37,7 +38,7 @@ def get_group_avgs(data, xlbls):
 
     return xlbl_avgs, xlbl_dict
 
-def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Temps'):
+def reconstruct_plot(data, xlbls, plot=True, title='Reconstructed Temps'):
     df_copy = data[['lat', 'long']].copy()
 
     df_copy['xlbl'] = xlbls
@@ -67,6 +68,60 @@ def reconstruct_groups(data, xlbls, plot=True, title='Reconstructed Temps'):
         plt.imshow(grid, cmap='hot_r', interpolation='nearest', vmin=data['generated_temp'].min(), vmax=data['generated_temp'].max())
         plt.colorbar()
         plt.title(title)
+
+    return grid
+
+def reconstruct_contour(data, xlbls, n_clusters, plot=True, title='Reconstructed Contours'):
+    df_copy = data[['lat', 'long']].copy()
+    df_copy['xlbl'] = xlbls
+    group_avgs, _ = get_group_avgs(data, xlbls)
+
+    asc_longs = np.sort(df_copy['long'].unique())
+    desc_lats = np.sort(df_copy['lat'].unique())[::-1]
+
+    grid = []
+    for lat in desc_lats:
+        row = []
+        for long in asc_longs:
+            point = df_copy[(df_copy['lat'] == lat) & (df_copy['long'] == long)]
+            if point.empty:
+                row.append(np.nan)
+            else:
+                group = point['xlbl'].values[0]
+                row.append(group_avgs[group])
+        grid.append(row)
+
+    grid = np.array(grid)
+
+    if plot:
+        nrows, ncols = grid.shape
+        x_vals = np.arange(ncols)
+        y_vals = np.arange(nrows)
+        X, Y = np.meshgrid(x_vals, y_vals)
+
+        nan_map = np.isnan(grid).astype(int)
+        nan_map = np.ma.masked_where(nan_map == 0, nan_map)
+        grey_cmap = mcolors.ListedColormap(['grey'])
+        plt.imshow(
+            nan_map,
+            cmap=grey_cmap,
+            vmin=1,
+            vmax=1,
+            interpolation='nearest',
+            origin='upper'
+        )
+
+        plt.contour(X, Y, grid, levels=n_clusters, colors='black', linewidths=0.5)
+        plt.gca().set_aspect('equal')
+
+        plt.tick_params(axis='both', which='both', labelbottom=False, labelleft=False)
+        plt.locator_params(axis='x', nbins=4)
+        plt.xlabel('Longitude', fontsize=13)
+        plt.ylabel('Latitude', fontsize=13)
+
+        plt.title(title, fontsize=13)
+        plt.tight_layout()
+        plt.show()
 
     return grid
 
@@ -193,6 +248,27 @@ def grad_angles(U, V, d):
 
     return angles
 
+def plot_area(data, units, title='Area'):
+    if units in ['elevation', 'alt', 'altitude']:
+        label = 'Elevation (m)'
+        cmap = plt.get_cmap('terrain')
+    elif units in ['temp', 'temperature']:
+        label = 'Temperature (°C)'
+        cmap = plt.get_cmap('hot_r')
+    cmap.set_bad('grey')
+
+    plt.imshow(data, cmap=cmap, interpolation='nearest')
+
+    plt.tick_params(axis='both', which='both', labelbottom=False, labelleft=False)
+    plt.locator_params(axis='x', nbins=4)
+
+    plt.xlabel('Longitude', fontsize=13)
+    plt.ylabel('Latitude', fontsize=13)
+    cbar = plt.colorbar()
+    cbar.set_ticks([])
+    cbar.set_label(label, fontsize=12)
+    plt.title(title, fontsize=13)
+    plt.show()
 
 
 # ALL DEPRECATED, WRONG IMPLEMENTATION (PREDICTED ELEVATION NOT TEMP)
