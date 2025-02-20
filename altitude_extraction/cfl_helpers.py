@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from sklearn.metrics import r2_score
 
-def get_alt_temp_grids(data):
+def get_alt_temp_grids(data, ocean=True):
     asc_longs = np.sort(data['long'].unique())
     desc_lats = np.sort(data['lat'].unique())[::-1]
 
@@ -15,7 +15,7 @@ def get_alt_temp_grids(data):
         alt_row = []
         for long in asc_longs:
             point = data.loc[(data['lat'] == lat) & (data['long'] == long)]
-            if len(point) == 0:
+            if len(point) == 0 or (point['elevation'].values[0] == 0 and not ocean):
                 temp_row.append(np.nan)
                 alt_row.append(np.nan)
                 continue
@@ -99,27 +99,17 @@ def reconstruct_contour(data, xlbls, n_clusters, plot=True, title='Reconstructed
         y_vals = np.arange(nrows)
         X, Y = np.meshgrid(x_vals, y_vals)
 
-        nan_map = np.isnan(grid).astype(int)
-        nan_map = np.ma.masked_where(nan_map == 0, nan_map)
-        grey_cmap = mcolors.ListedColormap(['grey'])
-        plt.imshow(
-            nan_map,
-            cmap=grey_cmap,
-            vmin=1,
-            vmax=1,
-            interpolation='nearest',
-            origin='upper'
-        )
-
         plt.contour(X, Y, grid, levels=n_clusters, colors='black', linewidths=0.5)
         plt.gca().set_aspect('equal')
+        plt.gca().invert_yaxis()
 
         plt.tick_params(axis='both', which='both', labelbottom=False, labelleft=False)
         plt.locator_params(axis='x', nbins=4)
         plt.xlabel('Longitude', fontsize=13)
         plt.ylabel('Latitude', fontsize=13)
 
-        plt.title(title, fontsize=13)
+        if title:
+            plt.title(title, fontsize=13)
         plt.tight_layout()
         plt.show()
 
@@ -172,7 +162,7 @@ def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, 
     plt.title(f'Average Temp and Count of Points by Cluster - {resolution} + {n_clusters} clusters', fontsize=14)
     plt.show()
 
-def gen_elevation_grads(data, d, nan_val=-100, white_back=False):
+def gen_elevation_grads(data, d, nan_val=-100, white_back=False, grey_back=False):
     grid = np.array(data)
 
     rows, cols = grid.shape
@@ -213,13 +203,15 @@ def gen_elevation_grads(data, d, nan_val=-100, white_back=False):
     grid = np.ma.masked_invalid(grid)
     if not white_back:
         cmap = plt.get_cmap('terrain')
-        cmap.set_bad('grey')
+        if grey_back:
+            cmap.set_bad('grey')
         cbar = fig.colorbar(ax.imshow(grid, cmap=cmap, origin='upper'), ax=ax)
         cbar.ax.tick_params(labelsize=10)
         cbar.set_label('Elevation (m)', fontsize=13)
     else:
         cmap = plt.get_cmap('gray_r')
-        cmap.set_bad('grey')
+        if grey_back:
+            cmap.set_bad('grey')
         ax.imshow(np.zeros_like(grid), cmap=cmap, origin='upper')
 
     ax.set_xticks([])
@@ -227,16 +219,17 @@ def gen_elevation_grads(data, d, nan_val=-100, white_back=False):
 
     return U, V
 
-def grad_angles(U, V, d):
+def grad_angles(U, V, title='Angle Representation of Gradients', grey_back=False):
     angles_raw = np.arctan2(-V, U)
     angles_raw[angles_raw < 0] += 2 * np.pi
     angles = angles_raw * 180 / np.pi  # Convert to degrees
     angles = np.ma.masked_invalid(angles)
 
     fig, ax = plt.subplots(figsize=(5, 6), dpi=150)
-    ax.set_title(f'Angle Representation of Gradients (Search Depth={d})', fontsize=10)
+    ax.set_title(title, fontsize=10)
     cmap = plt.get_cmap('twilight_shifted')
-    cmap.set_bad('grey')
+    if grey_back:
+        cmap.set_bad('grey')
 
     im = ax.imshow(angles, cmap=cmap, origin='upper')
     cbar = fig.colorbar(im, ax=ax)
@@ -248,14 +241,17 @@ def grad_angles(U, V, d):
 
     return angles
 
-def plot_area(data, units, title='Area'):
+def plot_area(data, units, title='Area', grey_back=False, color=None):
     if units in ['elevation', 'alt', 'altitude']:
         label = 'Elevation (m)'
         cmap = plt.get_cmap('terrain')
     elif units in ['temp', 'temperature']:
         label = 'Temperature (°C)'
         cmap = plt.get_cmap('hot_r')
-    cmap.set_bad('grey')
+    if color:
+        cmap = plt.get_cmap(color)
+    if grey_back:
+        cmap.set_bad('grey')
 
     plt.imshow(data, cmap=cmap, interpolation='nearest')
 
@@ -267,7 +263,8 @@ def plot_area(data, units, title='Area'):
     cbar = plt.colorbar()
     cbar.set_ticks([])
     cbar.set_label(label, fontsize=12)
-    plt.title(title, fontsize=13)
+    if title:
+        plt.title(title, fontsize=13)
     plt.show()
 
 
