@@ -55,3 +55,10 @@ TODO 2/10/2025:
 TODO 2/13/2025
 squared error for MAE graph instead, fix legend order, cut off at 150 x axis, change y axis bc squared error, get rid of title
 use matplotlib contour to generate estimations, 5 graphs in a row each with their own titles
+
+
+TODO 3/14/2025
+code base - what to do to update all instances of deprecated function?
+package code so that it can be a tutorial:
+- separate dataset for testing (13, 17, or other prime resolution), use as test error
+ways to generalize to more dimensions (what dimensions to add?)
