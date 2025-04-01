@@ -115,17 +115,25 @@ def reconstruct_contour(data, xlbls, n_clusters, plot=True, title='Reconstructed
 
     return grid
 
-def by_cluster_abs_err(data, xlbls, truth):
-    pred_group_avgs, _ = get_group_avgs(data, xlbls)
-    _, true_groups = get_group_avgs(truth, xlbls)
+def by_cluster_err(train, xlbls, test, test_xlbls, err='sq'):
+    group_avgs, _ = get_group_avgs(train, xlbls)
+    _, test_groups = get_group_avgs(test, test_xlbls)
     abs_err = 0
 
-    for group in pred_group_avgs.keys():
-        true_temps = np.array(true_groups[group])
-        pred_temp = pred_group_avgs[group]
-        abs_err += np.mean(np.abs(true_temps - pred_temp))
+    for group in group_avgs.keys():
+        if group not in test_groups:
+            true_temps = np.array([0])
+        else:
+            true_temps = np.array(test_groups[group])
+
+        pred_temp = group_avgs[group]
+
+        if err == 'sq':
+            abs_err += np.mean((true_temps - pred_temp)**2)
+        elif err == 'abs':
+            abs_err += np.mean(np.abs(true_temps - pred_temp))
     
-    return abs_err / len(pred_group_avgs.keys())
+    return abs_err / len(group_avgs.keys())
 
 def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, yminmax=None):
     resolution = "unknown resolution" if not resolution else resolution

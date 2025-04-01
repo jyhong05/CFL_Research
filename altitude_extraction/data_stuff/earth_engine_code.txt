@@ -1,0 +1,62 @@
+// Define the updated region of interest
+var geometry = ee.Geometry.Polygon([
+  [145.689763, -38.46084811709295], // Top left
+  [153.46844393263592, -38.46084811709295], // Top right
+  [153.46844393263592, -23.43113968154972], // Bottom right
+  [145.689763, -23.43113968154972], // Bottom left
+  [145.689763, -38.46084811709295] // Closing
+]);
+
+// Load the dataset
+var dataset = ee.Image('AU/GA/DEM_1SEC/v10/DEM-H');
+var elevation = dataset.select('elevation');
+
+// Clip the dataset to the geometry
+var elevationClipped = elevation.clip(geometry);
+
+var SCALE = 10000
+
+// Resample the image to a 40km x 40km resolution
+var elevationResampled = elevationClipped
+  .reproject({
+    crs: 'EPSG:4326', // WGS84 coordinate system
+    scale: SCALE
+  });
+
+// Add the resampled elevation layer to the map to visualize the overlay
+var elevationVis = {
+  min: -100.0,
+  max: 1300.0,
+  palette: [
+    '3ae237', 'b5e22e', 'd6e21f', 'fff705', 'ffd611', 'ffb613', 'ff8b13',
+    'ff6808', 'ff5000', 'ff0000', 'de0101', 'c21301', '602cff', '235cb1',
+    '3f073a', '296db1', '30c8e2', '32d3ef', '3be285', '3ff38f', '86e26f'
+  ]
+};
+
+// Add the resampled elevation layer to the map
+Map.addLayer(elevationResampled, elevationVis, 'Elevation (40km x 40km)');
+
+// Center the map on the region of interest
+Map.setCenter(133.95, -24.69, 5); // Longitude, Latitude, Zoom Level
+
+// Convert the resampled image to a FeatureCollection
+var elevationAsPoints = elevationResampled.sample({
+  region: geometry,
+  scale: SCALE,
+  projection: 'EPSG:4326',
+  geometries: true // Include latitude and longitude in the result
+});
+
+// Check the total number of points
+var pointCount = elevationAsPoints.size();
+print('Total number of points:', pointCount);
+
+// Export the FeatureCollection as a CSV
+Export.table.toDrive({
+  collection: elevationAsPoints,
+  description: 'Elevation_Resampled_40km_CSV',
+  folder: 'EarthEngineExports', // Optional: Folder in Google Drive
+  fileNamePrefix: 'elevation_40km', // Prefix for the file
+  fileFormat: 'CSV' // Export format
+});
