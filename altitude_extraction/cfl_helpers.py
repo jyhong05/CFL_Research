@@ -132,6 +132,23 @@ def by_cluster_err(train, xlbls, test, test_xlbls, err='sq'):
     
     return abs_err / len(test_groups.keys())
 
+def by_point_err(train, xlbls, test, test_xlbls, err='sq'):
+    group_avgs, _ = get_group_avgs(train, xlbls)
+    _, test_groups = get_group_avgs(test, test_xlbls)
+    abs_err = 0
+
+    for group in test_groups.keys():
+        true_temps = np.array(test_groups[group])
+
+        pred_temp = group_avgs[group]
+
+        if err == 'sq':
+            abs_err += np.sum((true_temps - pred_temp)**2)
+        elif err == 'abs':
+            abs_err += np.sum(np.abs(true_temps - pred_temp))
+            
+    return abs_err / len(test)
+
 def plot_pred_distribution(train_data, xlbls, resolution=None, n_clusters=None, yminmax=None):
     resolution = "unknown resolution" if not resolution else resolution
     n_clusters = "unknown" if not n_clusters else n_clusters
