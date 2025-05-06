@@ -67,4 +67,5 @@ TODO 4/18/2025
 cut sq err graph to 30 clusters
 get contour maps for 10km @ 10 clusters and 150km @ 5/7 clusters
 make tutorial for elevation/temp notebook
+fix repo
 
